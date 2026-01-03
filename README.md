@@ -38,8 +38,8 @@ EthAum.ai is an **AI-Powered Revenue Operating System**. We accelerate startups 
 
 ### 4. ⚡ The Revenue & Trust Engine (AppSumo + G2 Style)
 * **Smart Pilot Deals:** Auto-structured "Enterprise Pilot Packages" ($4,999 POCs) to bypass long sales cycles.
-* **Verified Reviews:** LinkedIn-verified identity badges to build enterprise trust.
-* **ROI Metrics:** Tracks "Time to Value" and "ROI Speed" directly on the card.
+* **AI Matchmaker:** Scans the market to suggest **3 Real-World Corporate Buyers** (M&A targets) with a match synergy score.
+* **Verified Reviews:** LinkedIn-verified identity badges to build enterprise trust with ROI tracking.
 
 ---
 
@@ -49,15 +49,15 @@ EthAum.ai is an **AI-Powered Revenue Operating System**. We accelerate startups 
 * **Frontend:** Next.js 14 (App Router)
 * **Language:** TypeScript (Strict Mode)
 * **Styling:** Tailwind CSS (Enterprise Dark Mode + Animated Gradients)
+* **UI Components:** Lucide React, Framer Motion (Transitions)
 
 ### Backend & AI
 * **Database:** Supabase (PostgreSQL)
 * **AI Logic:** OpenAI API (GPT-4 Turbo)
-* **Server Actions:** Next.js API Routes (`/api/generate-report`, `/api/oracle-chat`, `/api/stress-test`)
+* **Server Actions:** Next.js API Routes (`/api/generate-report`, `/api/oracle-chat`, `/api/stress-test`, `/api/matchmaker`)
 
-### Visualization & UI
+### Visualization
 * **Charts:** Recharts (Scatter Plots with Custom Axis)
-* **Icons:** Lucide React
 * **Effects:** Canvas Confetti, CSS Keyframe Animations (Shining Text, Pulse Effects)
 
 ---
@@ -70,7 +70,7 @@ Follow these instructions to set up the project locally.
 ```bash
 git clone [https://github.com/YOUR_USERNAME/ethaum-hackathon.git](https://github.com/YOUR_USERNAME/ethaum-hackathon.git)
 cd ethaum-hackathon
-```
+
 ### 2. Install dependencies
 \`\`\`bash
 npm install

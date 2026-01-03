@@ -3,16 +3,12 @@ import QuadrantChart from '@/components/QuadrantChart';
 import QuadrantLegend from '@/components/QuadrantLegend'; 
 import PilotDealCard from '@/components/PilotDealCard';
 import ReviewSection from '@/components/ReviewSection';
-import AIReportSection from '@/components/AIReportSection'; 
-import OracleChat from '@/components/OracleChat'; 
-import StressTest from '@/components/StressTest'; 
+import SidebarTools from '@/components/SidebarTools'; // <--- NEW IMPORT
 import Link from 'next/link';
 import { getMarketPosition } from '@/lib/ai';
 
-// Disable Caching for Real-Time AI
 export const revalidate = 0;
 
-// --- MISSING FUNCTION ADDED HERE ---
 async function getStartup(id: string) {
   const { data, error } = await supabase
     .from('startups')
@@ -23,13 +19,11 @@ async function getStartup(id: string) {
   if (error) console.error("Error fetching startup:", error);
   return data;
 }
-// -----------------------------------
 
 export default async function StartupDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const startup = await getStartup(id);
 
-  // Error Screen
   if (!startup) {
     return (
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white p-4">
@@ -41,7 +35,6 @@ export default async function StartupDetail({ params }: { params: Promise<{ id: 
     );
   }
 
-  // AI Position Calculation
   const aiStats = await getMarketPosition(startup.name, startup.description);
 
   return (
@@ -49,6 +42,10 @@ export default async function StartupDetail({ params }: { params: Promise<{ id: 
       {/* Background Grid */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] pointer-events-none" />
       
+      {/* --- NEW: SIDEBAR TOOLS INJECTED HERE --- */}
+      <SidebarTools startupName={startup.name} description={startup.description} />
+      {/* --------------------------------------- */}
+
       <div className="relative z-10 max-w-7xl mx-auto">
         <Link href="/">
           <button className="mb-8 text-slate-400 hover:text-white transition">← Back to Dashboard</button>
@@ -56,7 +53,7 @@ export default async function StartupDetail({ params }: { params: Promise<{ id: 
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          {/* LEFT: Info & Deal */}
+          {/* LEFT COLUMN: Info & Deals */}
           <div className="lg:col-span-1 space-y-6">
             <div className="bg-slate-900/80 p-6 rounded-xl border border-slate-700 backdrop-blur-sm">
               <h1 className="text-4xl font-bold text-white mb-2">{startup.name}</h1>
@@ -67,7 +64,7 @@ export default async function StartupDetail({ params }: { params: Promise<{ id: 
             <PilotDealCard startupName={startup.name} />
           </div>
 
-          {/* RIGHT: AI Graph & Reviews & REPORT & ORACLE & STRESS TEST */}
+          {/* RIGHT COLUMN: Graph & Reviews (Cleaned up!) */}
           <div className="lg:col-span-2 space-y-6">
             
             {/* 1. AI GRAPH SECTION */}
@@ -83,24 +80,10 @@ export default async function StartupDetail({ params }: { params: Promise<{ id: 
                    y={aiStats.y} 
                  />
                </div>
-               
-               {/* LEGEND */}
                <QuadrantLegend />
             </div>
 
-            {/* 2. ANALYTICS & STRATEGY GRID */}
-            <div className="grid grid-cols-1 gap-6">
-                {/* VC Report */}
-                <AIReportSection startupName={startup.name} description={startup.description} />
-                
-                {/* The Oracle Chat */}
-                <OracleChat startupName={startup.name} description={startup.description} />
-            </div>
-
-            {/* 3. STRESS TEST SIMULATOR */}
-            <StressTest startupName={startup.name} description={startup.description} />
-
-            {/* 4. REVIEWS SECTION */}
+            {/* 2. REVIEWS SECTION */}
             <ReviewSection />
           </div>
         </div>
