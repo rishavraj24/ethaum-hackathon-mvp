@@ -1,10 +1,15 @@
 'use client';
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Label } from 'recharts';
 
-export default function QuadrantChart({ startupName }: { startupName: string }) {
-  // SIMULATED AI DATA (In a real app, OpenAI generates this)
+// Update props to accept optional X and Y
+export default function QuadrantChart({ startupName, x, y }: { startupName: string, x?: number, y?: number }) {
+  
+  // Use the passed X/Y, or fallback to "Leader" position (85, 90) if missing
+  const heroX = x || 85;
+  const heroY = y || 90;
+
   const data = [
-    { x: 85, y: 90, name: startupName, isHero: true }, // The User (Top Right)
+    { x: heroX, y: heroY, name: startupName, isHero: true }, // <--- DYNAMIC HERO POSITION
     { x: 45, y: 80, name: 'Competitor A', isHero: false },
     { x: 70, y: 40, name: 'Competitor B', isHero: false },
     { x: 30, y: 30, name: 'Legacy Corp', isHero: false },
@@ -12,7 +17,7 @@ export default function QuadrantChart({ startupName }: { startupName: string }) 
   ];
 
   return (
-    <div className="w-full h-[400px] bg-white rounded-lg p-4 text-black">
+    <div className="w-full h-full bg-white rounded-lg p-4 text-black">
       <h3 className="text-center font-bold text-slate-800 mb-2">AI Market Positioning: {startupName}</h3>
       <ResponsiveContainer width="100%" height="100%">
         <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
