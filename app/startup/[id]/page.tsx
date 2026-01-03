@@ -1,103 +1,61 @@
 import { supabase } from '@/lib/supabaseClient';
-import QuadrantChart from '@/components/QuadrantChart';
-import PilotDealCard from '@/components/PilotDealCard';
-import ReviewSection from '@/components/ReviewSection';
 import Link from 'next/link';
-import { getMarketPosition } from '@/lib/ai'; // <--- NEW IMPORT
+import StartupCard from '@/components/StartupCard';
 
-// Fetch data for this specific startup
-async function getStartup(id: string) {
-  const { data, error } = await supabase
+export const revalidate = 0;
+
+async function getStartups() {
+  const { data: startups } = await supabase
     .from('startups')
-    .select('*')
-    .eq('id', id)
-    .single();
-  
-  if (error) {
-    console.error("Error fetching startup:", error);
-  }
-  return data;
+    .select('*, launches(upvotes)')
+    .order('created_at', { ascending: false });
+  return startups || [];
 }
 
-export default async function StartupDetail({ params }: { params: Promise<{ id: string }> }) {
-  // 1. Wait for ID
-  const { id } = await params;
-  const startup = await getStartup(id);
+export default async function Home() {
+  const startups = await getStartups();
 
-  // 2. Error Screen (Dark Mode)
-  if (!startup) {
-    return (
-      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center text-white p-4">
-        <h1 className="text-4xl font-bold text-red-500 mb-4">Startup Not Found</h1>
-        <p className="text-slate-400 mb-8 text-center max-w-md">
-           We looked for ID: <span className="font-mono text-xs bg-slate-800 p-1 rounded">{id}</span> but couldn't find it.
-        </p>
-        <Link href="/">
-          <button className="px-6 py-3 bg-blue-600 rounded-lg font-bold hover:bg-blue-500 transition">
-            ← Return to Dashboard
-          </button>
-        </Link>
-      </div>
-    );
-  }
-
-  // 3. GET REAL AI POSITIONING (Server-Side)
-  // This uses your OpenAI Key to calculate position based on description
-  const aiStats = await getMarketPosition(startup.name, startup.description);
-
-  // 4. Main Page
   return (
-    <main className="min-h-screen bg-slate-900 text-white p-8">
-      {/* BACK BUTTON */}
-      <Link href="/">
-        <button className="mb-8 text-slate-400 hover:text-white transition">← Back to Dashboard</button>
-      </Link>
+    // 1. NEW: GRID BACKGROUND
+    <main className="min-h-screen bg-slate-950 relative overflow-hidden">
+      {/* Grid Pattern Overlay */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-        
-        {/* LEFT COLUMN: INFO & PRICING */}
-        <div className="lg:col-span-1 space-y-6">
-          <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
-            <h1 className="text-4xl font-bold text-white mb-2">{startup.name}</h1>
-            <p className="text-emerald-400 font-medium text-lg mb-4">{startup.tagline}</p>
-            <p className="text-slate-300 leading-relaxed">{startup.description}</p>
-            
-            <div className="mt-6 pt-6 border-t border-slate-700">
-              <h3 className="font-semibold text-slate-400 mb-2">Website</h3>
-              <a href="#" className="text-blue-400 hover:underline">Visit {startup.name}.com ↗</a>
-            </div>
-          </div>
+      <div className="relative z-10 p-12">
+        <div className="max-w-5xl mx-auto text-center mb-16">
           
-          {/* THE DEAL CARD */}
-          <PilotDealCard startupName={startup.name} />
-
+          {/* 2. NEW: SHINING ANIMATED TEXT */}
+          <h1 className="text-7xl font-black tracking-tight mb-4">
+            <span className="animate-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-clip-text text-transparent text-8xl font-black bg-300%">
+              EthAum.ai
+            </span>
+          </h1>
+          
+          <p className="mt-6 text-xl text-slate-400 max-w-2xl mx-auto">
+            The Revenue Operating System for Startups. <br/>
+            <span className="text-slate-500 text-sm">Launch • Validate • Sell • Trust</span>
+          </p>
+          
+          <div className="mt-10">
+            <Link href="/launch">
+              <button className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-full transition-all shadow-[0_0_40px_-10px_rgba(16,185,129,0.5)] hover:shadow-[0_0_60px_-10px_rgba(16,185,129,0.7)] hover:scale-105">
+                🚀 Launch Your Startup
+              </button>
+            </Link>
+          </div>
         </div>
 
-        {/* RIGHT COLUMN: INTELLIGENCE & REVIEWS */}
-        <div className="lg:col-span-2 space-y-6">
-          
-          {/* THE QUADRANT CHART */}
-          <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
-             <div className="flex justify-between items-center mb-6">
-               <h2 className="text-2xl font-bold">AI Market Analysis</h2>
-               <span className="bg-purple-900 text-purple-200 text-xs px-2 py-1 rounded border border-purple-500">Generated by GPT-4</span>
-             </div>
-             <div className="h-[400px]">
-               {/* Pass the AI-Calculated X and Y here */}
-               <QuadrantChart 
-                 startupName={startup.name} 
-                 x={aiStats.x} 
-                 y={aiStats.y} 
-               />
-             </div>
-             <p className="mt-4 text-sm text-slate-400 text-center">
-               *EthAum AI analyzes 50+ data points to position {startup.name} as a "Leader".
-             </p>
-          </div>
-
-          {/* THE REVIEWS SECTION */}
-          <ReviewSection />
-
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+          {startups.map((startup: any) => {
+            const upvoteCount = startup.launches?.[0]?.upvotes || 0;
+            return (
+              <StartupCard 
+                key={startup.id} 
+                startup={startup} 
+                initialUpvotes={upvoteCount} 
+              />
+            );
+          })}
         </div>
       </div>
     </main>

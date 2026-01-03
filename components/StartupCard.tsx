@@ -1,24 +1,34 @@
 'use client';
+import confetti from 'canvas-confetti';
 import Link from 'next/link';
 import { useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { ArrowBigUp, Trash2 } from 'lucide-react'; // Added Trash2 icon
+import { ArrowBigUp, Trash2 } from 'lucide-react'; 
 import { useRouter } from 'next/navigation';
 
 export default function StartupCard({ startup, initialUpvotes }: { startup: any, initialUpvotes: number }) {
   const [upvotes, setUpvotes] = useState(initialUpvotes);
   const [hasVoted, setHasVoted] = useState(false);
-  const router = useRouter(); // To refresh page after delete
+  const router = useRouter(); 
 
   async function handleUpvote() {
     if (hasVoted) return; 
+
+    // TRIGGER CONFETTI EXPLOSION
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#10B981', '#3B82F6', '#F59E0B'] // EthAum Brand Colors
+    });
+
     const newCount = upvotes + 1;
     setUpvotes(newCount);
     setHasVoted(true);
     await supabase.rpc('increment_upvotes', { startup_id_input: startup.id });
   }
 
-  // NEW: DELETE FUNCTION
+  // DELETE FUNCTION
   async function handleDelete(e: any) {
     e.preventDefault(); // Stop the link from clicking
     e.stopPropagation();
