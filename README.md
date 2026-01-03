@@ -1,7 +1,7 @@
 # EthAum.ai - The Revenue Operating System for Startups
 
 ### 🏆 Submission for EthAum Venture Partners Hackathon
-**Team:** [Your Team Name]
+**Team:** Team Blackswan
 **Tagline:** Stopping the "Death Valley" curve for Series A startups by unifying Launch, Intelligence, Revenue, and Trust into one AI-driven ecosystem.
 
 ---
