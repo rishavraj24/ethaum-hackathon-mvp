@@ -1,61 +1,108 @@
 import { supabase } from '@/lib/supabaseClient';
+import QuadrantChart from '@/components/QuadrantChart';
+import QuadrantLegend from '@/components/QuadrantLegend'; 
+import PilotDealCard from '@/components/PilotDealCard';
+import ReviewSection from '@/components/ReviewSection';
+import AIReportSection from '@/components/AIReportSection'; 
+import OracleChat from '@/components/OracleChat'; 
+import StressTest from '@/components/StressTest'; 
 import Link from 'next/link';
-import StartupCard from '@/components/StartupCard';
+import { getMarketPosition } from '@/lib/ai';
 
+// Disable Caching for Real-Time AI
 export const revalidate = 0;
 
-async function getStartups() {
-  const { data: startups } = await supabase
+// --- MISSING FUNCTION ADDED HERE ---
+async function getStartup(id: string) {
+  const { data, error } = await supabase
     .from('startups')
-    .select('*, launches(upvotes)')
-    .order('created_at', { ascending: false });
-  return startups || [];
+    .select('*')
+    .eq('id', id)
+    .single();
+  
+  if (error) console.error("Error fetching startup:", error);
+  return data;
 }
+// -----------------------------------
 
-export default async function Home() {
-  const startups = await getStartups();
+export default async function StartupDetail({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const startup = await getStartup(id);
+
+  // Error Screen
+  if (!startup) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white p-4">
+        <h1 className="text-4xl font-bold text-red-500 mb-4">Startup Not Found</h1>
+        <Link href="/">
+          <button className="px-6 py-3 bg-blue-600 rounded-lg font-bold">← Back</button>
+        </Link>
+      </div>
+    );
+  }
+
+  // AI Position Calculation
+  const aiStats = await getMarketPosition(startup.name, startup.description);
 
   return (
-    // 1. NEW: GRID BACKGROUND
-    <main className="min-h-screen bg-slate-950 relative overflow-hidden">
-      {/* Grid Pattern Overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
+    <main className="min-h-screen bg-slate-950 text-white p-8 relative overflow-hidden">
+      {/* Background Grid */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] pointer-events-none" />
+      
+      <div className="relative z-10 max-w-7xl mx-auto">
+        <Link href="/">
+          <button className="mb-8 text-slate-400 hover:text-white transition">← Back to Dashboard</button>
+        </Link>
 
-      <div className="relative z-10 p-12">
-        <div className="max-w-5xl mx-auto text-center mb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          {/* 2. NEW: SHINING ANIMATED TEXT */}
-          <h1 className="text-7xl font-black tracking-tight mb-4">
-            <span className="animate-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-clip-text text-transparent text-8xl font-black bg-300%">
-              EthAum.ai
-            </span>
-          </h1>
-          
-          <p className="mt-6 text-xl text-slate-400 max-w-2xl mx-auto">
-            The Revenue Operating System for Startups. <br/>
-            <span className="text-slate-500 text-sm">Launch • Validate • Sell • Trust</span>
-          </p>
-          
-          <div className="mt-10">
-            <Link href="/launch">
-              <button className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-full transition-all shadow-[0_0_40px_-10px_rgba(16,185,129,0.5)] hover:shadow-[0_0_60px_-10px_rgba(16,185,129,0.7)] hover:scale-105">
-                🚀 Launch Your Startup
-              </button>
-            </Link>
+          {/* LEFT: Info & Deal */}
+          <div className="lg:col-span-1 space-y-6">
+            <div className="bg-slate-900/80 p-6 rounded-xl border border-slate-700 backdrop-blur-sm">
+              <h1 className="text-4xl font-bold text-white mb-2">{startup.name}</h1>
+              <p className="text-emerald-400 font-medium text-lg mb-4">{startup.tagline}</p>
+              <p className="text-slate-300 leading-relaxed">{startup.description}</p>
+            </div>
+            
+            <PilotDealCard startupName={startup.name} />
           </div>
-        </div>
 
-        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-          {startups.map((startup: any) => {
-            const upvoteCount = startup.launches?.[0]?.upvotes || 0;
-            return (
-              <StartupCard 
-                key={startup.id} 
-                startup={startup} 
-                initialUpvotes={upvoteCount} 
-              />
-            );
-          })}
+          {/* RIGHT: AI Graph & Reviews & REPORT & ORACLE & STRESS TEST */}
+          <div className="lg:col-span-2 space-y-6">
+            
+            {/* 1. AI GRAPH SECTION */}
+            <div className="bg-slate-900/80 p-6 rounded-xl border border-slate-700 backdrop-blur-sm">
+               <div className="flex justify-between items-center mb-6">
+                 <h2 className="text-2xl font-bold">AI Market Analysis</h2>
+                 <span className="bg-purple-900 text-purple-200 text-xs px-2 py-1 rounded border border-purple-500">Generated by GPT-4</span>
+               </div>
+               <div className="h-[400px]">
+                 <QuadrantChart 
+                   startupName={startup.name} 
+                   x={aiStats.x} 
+                   y={aiStats.y} 
+                 />
+               </div>
+               
+               {/* LEGEND */}
+               <QuadrantLegend />
+            </div>
+
+            {/* 2. ANALYTICS & STRATEGY GRID */}
+            <div className="grid grid-cols-1 gap-6">
+                {/* VC Report */}
+                <AIReportSection startupName={startup.name} description={startup.description} />
+                
+                {/* The Oracle Chat */}
+                <OracleChat startupName={startup.name} description={startup.description} />
+            </div>
+
+            {/* 3. STRESS TEST SIMULATOR */}
+            <StressTest startupName={startup.name} description={startup.description} />
+
+            {/* 4. REVIEWS SECTION */}
+            <ReviewSection />
+          </div>
         </div>
       </div>
     </main>

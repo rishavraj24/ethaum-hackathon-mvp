@@ -1,49 +1,97 @@
 'use client';
-import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Label } from 'recharts';
+import {
+  ScatterChart,
+  Scatter,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  ReferenceLine,
+  Label
+} from 'recharts';
 
-// Update props to accept optional X and Y
-export default function QuadrantChart({ startupName, x, y }: { startupName: string, x?: number, y?: number }) {
+export default function QuadrantChart({ startupName, x, y }: { startupName: string, x: number, y: number }) {
   
-  // Use the passed X/Y, or fallback to "Leader" position (85, 90) if missing
-  const heroX = x || 85;
-  const heroY = y || 90;
+  // Data for the specific startup
+  const data = [{ x, y, name: startupName }];
 
-  const data = [
-    { x: heroX, y: heroY, name: startupName, isHero: true }, // <--- DYNAMIC HERO POSITION
-    { x: 45, y: 80, name: 'Competitor A', isHero: false },
-    { x: 70, y: 40, name: 'Competitor B', isHero: false },
-    { x: 30, y: 30, name: 'Legacy Corp', isHero: false },
-    { x: 60, y: 65, name: 'Startup X', isHero: false },
+  // Dummy data to show other "competitors" for context (makes the chart look alive)
+  const competitors = [
+    { x: 30, y: 30, name: 'Legacy Co.' },
+    { x: 80, y: 90, name: 'Market Leader' },
+    { x: 60, y: 65, name: 'Rising Star' },
+    { x: 70, y: 40, name: 'Niche App' },
+    { x: 45, y: 80, name: 'Challenger X' },
   ];
 
   return (
-    <div className="w-full h-full bg-white rounded-lg p-4 text-black">
+    <div className="w-full h-full bg-white rounded-lg p-4 shadow-inner">
       <h3 className="text-center font-bold text-slate-800 mb-2">AI Market Positioning: {startupName}</h3>
-      <ResponsiveContainer width="100%" height="100%">
-        <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-          <CartesianGrid />
-          {/* THE AXES */}
-          <XAxis type="number" dataKey="x" name="Execution" domain={[0, 100]} label={{ value: 'Ability to Execute', position: 'bottom', offset: 0 }} />
-          <YAxis type="number" dataKey="y" name="Innovation" domain={[0, 100]} label={{ value: 'Completeness of Vision', angle: -90, position: 'left' }} />
+      
+      <ResponsiveContainer width="100%" height={350}>
+        <ScatterChart
+          margin={{
+            top: 20,
+            right: 30,
+            bottom: 50, // INCREASED BOTTOM MARGIN TO FIX OVERLAP
+            left: 20,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
           
-          {/* THE QUADRANT LINES */}
+          {/* X AXIS - FIXED LABEL POSITION */}
+          <XAxis 
+            type="number" 
+            dataKey="x" 
+            name="Ability to Execute" 
+            domain={[0, 100]}
+            label={{ 
+              value: 'Ability to Execute', 
+              position: 'insideBottom', 
+              offset: -35, // Pushes label down manually
+              fill: '#475569',
+              fontWeight: 'bold'
+            }} 
+          />
+          
+          {/* Y AXIS */}
+          <YAxis 
+            type="number" 
+            dataKey="y" 
+            name="Completeness of Vision" 
+            domain={[0, 100]} 
+            label={{ 
+              value: 'Completeness of Vision', 
+              angle: -90, 
+              position: 'insideLeft',
+              offset: 0,
+              fill: '#475569',
+              fontWeight: 'bold',
+              style: { textAnchor: 'middle' }
+            }}
+          />
+          
+          <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+          
+          {/* QUADRANT LINES */}
           <ReferenceLine x={50} stroke="red" strokeDasharray="3 3" />
           <ReferenceLine y={50} stroke="red" strokeDasharray="3 3" />
 
           {/* QUADRANT LABELS */}
-          <Label value="Challengers" position="insideTopLeft" />
-          <Label value="Leaders" position="insideTopRight" />
-          <Label value="Niche Players" position="insideBottomLeft" />
-          <Label value="Visionaries" position="insideBottomRight" />
+          <ReferenceLine y={95} label={{ position: 'insideTopRight', value: 'Leaders', fill: '#94a3b8', fontSize: 12 }} stroke="none" />
+          <ReferenceLine y={95} label={{ position: 'insideTopLeft', value: 'Challengers', fill: '#94a3b8', fontSize: 12 }} stroke="none" />
+          <ReferenceLine y={5} label={{ position: 'insideBottomRight', value: 'Visionaries', fill: '#94a3b8', fontSize: 12 }} stroke="none" />
+          <ReferenceLine y={5} label={{ position: 'insideBottomLeft', value: 'Niche Players', fill: '#94a3b8', fontSize: 12 }} stroke="none" />
 
-          <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-          
-          {/* THE DOTS */}
-          <Scatter name="Startups" data={data} fill="#8884d8">
-            {data.map((entry, index) => (
-              <circle key={index} cx={0} cy={0} r={entry.isHero ? 8 : 5} fill={entry.isHero ? "#2563eb" : "#94a3b8"} stroke="none" />
-            ))}
+          {/* COMPETITOR DOTS (Gray) */}
+          <Scatter name="Competitors" data={competitors} fill="#94a3b8" />
+
+          {/* STARTUP DOT (Blue & Pulsing) */}
+          <Scatter name={startupName} data={data} fill="#3b82f6" shape="circle">
+             {/* Custom pulsing animation for the main dot if possible, otherwise standard blue */}
           </Scatter>
+
         </ScatterChart>
       </ResponsiveContainer>
     </div>
